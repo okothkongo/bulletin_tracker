@@ -14,6 +14,7 @@ defmodule BulletinTracker.Application do
       BulletinTrackerWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: BulletinTracker.PubSub},
+      {BulletinTracker.ContentFetchingJob, {"", :content_fetching_job}},
       # Start the Endpoint (http/https)
       BulletinTrackerWeb.Endpoint
       # Start a worker by calling: BulletinTracker.Worker.start_link(arg)
