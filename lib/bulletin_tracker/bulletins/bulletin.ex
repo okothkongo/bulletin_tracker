@@ -5,6 +5,7 @@ defmodule BulletinTracker.Bulletins.Bulletin do
   schema "bulletins" do
     field :category, :string
     field :priority_date, :date
+    field :part_of_the_world, :string
 
     timestamps()
   end
@@ -12,8 +13,8 @@ defmodule BulletinTracker.Bulletins.Bulletin do
   @doc false
   def changeset(bulletin, attrs) do
     bulletin
-    |> cast(attrs, [:category, :priority_date])
-    |> validate_required([:category, :priority_date])
-    |> unique_constraint(:category)
+    |> cast(attrs, [:category, :priority_date, :part_of_the_world])
+    |> validate_required([:category, :priority_date, :part_of_the_world])
+    |> unique_constraint([:category, :priority_date])
   end
 end
