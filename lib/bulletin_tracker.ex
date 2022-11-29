@@ -6,26 +6,27 @@ defmodule BulletinTracker do
   Contexts are also responsible for managing your data, regardless
   if it comes from the database, an external API or others.
   """
-
+  require Logger
   @base_url System.get_env("BASE_URL")
   @additional_text System.get_env("ADDITIONAL_TEXT")
 
-  def get_category_and_date() do
+  def get_bulletin_data() do
+    get_category_and_date()
+    |> Enum.map(fn {key, value} -> {key, Enum.zip(value, build_country())} end)
+  end
+
+  def retry_fetching_content do
+    fetch_content()
+  end
+
+  defp build_country() do
+    ["Rest Of The World", "Mainland China", "India", "Mexico", "Philippines"]
+  end
+
+  defp get_category_and_date() do
     fetch_content()
     |> parse_content()
     |> BulletinTracker.Parser.parser()
-  end
-
-  defp fetch_content do
-    get_bulletin_url()
-    |> Crawly.fetch()
-    |> case do
-      %{status_code: 404} ->
-        "we will talk later"
-
-      %{body: content, status_code: 200} ->
-        content
-    end
   end
 
   defp parse_content(content) do
@@ -33,6 +34,19 @@ defmodule BulletinTracker do
     |> Floki.parse_document!()
     |> Floki.find("table")
     |> Floki.text()
+  end
+
+  defp fetch_content do
+    get_bulletin_url()
+    |> Crawly.fetch()
+    |> case do
+      %{body: content, status_code: 200} ->
+        content
+
+      error ->
+        Logger.error("Fetching Content failed in #{inspect(__MODULE__)}, error: #{error}")
+        :timer.apply_after(60000 * 5, __MODULE__, :retry_fetching_content, [])
+    end
   end
 
   defp get_bulletin_url() do

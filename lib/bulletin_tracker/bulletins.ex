@@ -54,7 +54,7 @@ defmodule BulletinTracker.Bulletins do
     |> Bulletin.changeset(attrs)
     |> Repo.insert(
       on_conflict: {:replace, [:priority_date]},
-      conflict_target: :category,
+      conflict_target: [:category, :priority_date],
       returning: true
     )
   end
